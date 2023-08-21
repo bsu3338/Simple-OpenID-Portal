@@ -4,7 +4,7 @@ services:
   simpo-frontend:
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile.frontend
+      dockerfile: frontend/Dockerfile
     env_file:
       - .env
     volumes:
@@ -13,7 +13,7 @@ services:
   simpo-backend:
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile.backend
+      dockerfile: backend/Dockerfile
     volumes:
       - shared-data:/data
     privileged: true  # This is required to modify iptables rules
