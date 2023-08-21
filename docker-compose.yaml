@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  frontend:
+    image: your_frontend_image
+    volumes:
+      - shared-data:/data
+
+  iptables-updater:
+    image: your_iptables_updater_image
+    volumes:
+      - shared-data:/data
+    privileged: true  # This is required to modify iptables rules
+
+volumes:
+  shared-data:
