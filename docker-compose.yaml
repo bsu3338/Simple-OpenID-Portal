@@ -7,6 +7,15 @@ services:
       dockerfile: dockerfiles/Dockerfile.frontend
     volumes:
       - shared-data:/data
+    environment:
+      OPENID_CLIENT_ID: ""
+      OPENID_CLIENT_SECRET: ""
+      OPENID_ISSUER: ""
+      OPENID_SESSION_SECRET: ""
+      OPENID_SCOPE: "openid profile email"
+      OPENID_CALLBACK_URL: "/oauth/openid/callback"
+      OPENID_BUTTON_LABEL: ""
+      OPENID_IMAGE_URL: ""
 
   simpo-backend:
     build:
