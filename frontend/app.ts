@@ -5,6 +5,10 @@ import session from 'express-session';
 import { createObjectCsvWriter } from 'csv-writer';
 
 const app = express();
+if (process.env.TRUST_PROXY === 'true') {
+  app.set('trust proxy', true);
+}
+
 
 const {
   OPENID_CLIENT_ID,
