@@ -44,13 +44,14 @@ class QueueHandler(FileSystemEventHandler):
 
     def log_processed_details(self, details):
         """
-        Log processed user details to a file named by the day of the year.
+        Log processed user details to a file named by the year, month, and day.
         """
-        day_of_year = datetime.now().strftime('%j')
-        log_file = f"{day_of_year}.log"
+        date_str = datetime.now().strftime('%Y_%m_%d')
+        log_file = f"{date_str}.log"
         with open(log_file, 'a') as file:
             file.write(details + '\n')
             print(f"Logged details to {log_file}.")
+
 
     def on_created(self, event):
         self.process(event)
