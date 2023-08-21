@@ -8,16 +8,15 @@ services:
     env_file:
       - .env
     volumes:
-      - simpo/shared-data:/data
+      - ./simpo/shared-data:/data
 
   simpo-backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
     volumes:
-      - simpo/shared-data:/data
-      - simpo/backend-data:/app/data
+      - ./simpo/shared-data:/data
+      - ./simpo/backend-data:/app/data
     privileged: true  # This is required to modify iptables rules
 
-volumes:
-  shared-data:
+
