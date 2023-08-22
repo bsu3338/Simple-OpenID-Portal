@@ -2,13 +2,13 @@ import express from 'express';
 import passport from 'passport';
 import { Issuer, Strategy } from 'openid-client';
 import session from 'express-session';
-import { createObjectCsvWriter } from 'csv-writer';
+import fs from 'fs';
+import path from 'path';
 
 const app = express();
 if (process.env.TRUST_PROXY === 'true') {
   app.set('trust proxy', true);
 }
-
 
 const {
   OPENID_CLIENT_ID,
@@ -20,17 +20,7 @@ const {
   REDIRECT_URL,
 } = process.env;
 
-const csvWriter = createObjectCsvWriter({
-  path: '/data/client_info.csv',
-  header: [
-    { id: 'id', title: 'ID' },
-    { id: 'email', title: 'EMAIL' },
-    { id: 'ipAddress', title: 'IP Address' },
-    { id: 'userAgent', title: 'User Agent' },
-    // Add other fields as needed
-  ],
-  append: true,
-});
+const DATA_DIR = '/data';
 
 Issuer.discover(OPENID_ISSUER!).then(issuer => {
   const client = new issuer.Client({
@@ -73,20 +63,24 @@ Issuer.discover(OPENID_ISSUER!).then(issuer => {
   }));
 
   app.get(OPENID_CALLBACK_URL!, passport.authenticate('openid', { failureRedirect: '/' }), (req, res) => {
-    // Save user info to CSV
+    // Save user info to individual files
     const userInfoWithAgent = {
       ...req.user,
       userAgent: req.headers['user-agent'] || 'Unknown',
       ipAddress: req.ip
     };
-    csvWriter.writeRecords([userInfoWithAgent])
-      .then(() => {
-        const redirectURL = req.session!.returnTo || REDIRECT_URL || '/';
-        delete req.session!.returnTo;  // Clear the session value
-        res.redirect(redirectURL);
-      });
+    const filename = path.join(DATA_DIR, `${req.user.sub}_${Date.now()}.json`);
+    fs.writeFile(filename, JSON.stringify(userInfoWithAgent, null, 2), (err) => {
+      if (err) {
+        console.error(`Failed to write user data to file: ${err}`);
+        res.status(500).send('Internal Server Error');
+        return;
+      }
+      const redirectURL = req.session!.returnTo || REDIRECT_URL || '/';
+      delete req.session!.returnTo;  // Clear the session value
+      res.redirect(redirectURL);
+    });
   });
-
 
   app.get('/', (req, res) => {
     if (req.isAuthenticated()) {
@@ -101,4 +95,3 @@ Issuer.discover(OPENID_ISSUER!).then(issuer => {
     console.log(`Server started on http://localhost:${PORT}`);
   });
 });
-
